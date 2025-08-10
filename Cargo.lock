@@ -93,7 +93,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9555578bc9e57714c812a1f84e4fc5b4d21fcb063490c624de019f7464c91268"
 
 [[package]]
-name = "client"
+name = "chaos-type-client"
 version = "0.1.0"
 dependencies = [
  "crossterm",
@@ -102,6 +102,15 @@ dependencies = [
  "tokio",
  "tokio-tungstenite",
  "url",
+]
+
+[[package]]
+name = "chaos-type-server"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "tokio",
+ "tokio-tungstenite",
 ]
 
 [[package]]
@@ -781,15 +790,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "futures",
- "tokio",
- "tokio-tungstenite",
 ]
 
 [[package]]

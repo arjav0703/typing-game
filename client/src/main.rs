@@ -385,7 +385,7 @@ fn draw_welcome_screen(f: &mut Frame, app: &App) {
         .split(f.size());
 
     // Title
-    let title = Paragraph::new("🚀 Collaborative Typing Game 🚀")
+    let title = Paragraph::new("Chaos Type")
         .style(
             Style::default()
                 .fg(Color::Cyan)
@@ -399,9 +399,9 @@ fn draw_welcome_screen(f: &mut Frame, app: &App) {
     let welcome_text = vec![
         Line::from(""),
         Line::from(vec![
-            Span::styled("Welcome to the ", Style::default().fg(Color::White)),
+            Span::styled("Welcome to ", Style::default().fg(Color::White)),
             Span::styled(
-                "Collaborative Typing Game",
+                "Chaos Type",
                 Style::default()
                     .fg(Color::Yellow)
                     .add_modifier(Modifier::BOLD),
@@ -641,7 +641,7 @@ fn draw_help_popup(f: &mut Frame) {
     let help_text = vec![
         Line::from(""),
         Line::from(vec![Span::styled(
-            "Collaborative Typing Game - Help",
+            "Chaos Type - Help",
             Style::default()
                 .fg(Color::Yellow)
                 .add_modifier(Modifier::BOLD),
@@ -651,7 +651,7 @@ fn draw_help_popup(f: &mut Frame) {
         Line::from("  • Type words and press ENTER to send"),
         Line::from("  • ESC: Return to welcome screen"),
         Line::from("  • Q: Quit application"),
-        Line::from("  • F1: Toggle this help"),
+        Line::from("  • H: Toggle this help"),
         Line::from(""),
         Line::from("📝 How to Play:"),
         Line::from("  • Connect to the server"),

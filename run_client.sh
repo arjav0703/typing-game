@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting Collaborative Typing Game Client..."
+echo "Starting chaos-type-client..."
 echo "Make sure the server is running first!"
 echo ""
 
