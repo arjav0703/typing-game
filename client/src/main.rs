@@ -559,7 +559,7 @@ fn draw_game_screen(f: &mut Frame, app: &App) {
 
     // Header with connection status
     let header = Paragraph::new(format!(
-        "🎮 Collaborative Typing Game | Status: {} | Speed: {:.1} WPM",
+        "🎮 Chaos Type | Status: {} | Speed: {:.1} WPM",
         app.connection_status, app.typing_speed
     ))
     .style(
