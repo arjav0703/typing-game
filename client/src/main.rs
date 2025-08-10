@@ -12,7 +12,7 @@ async fn main() {
     let read_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = read.next().await {
             println!("\nCurrent Sentence: {}", msg.to_text().unwrap_or(""));
-            print!("Your letter: ");
+            print!("Your word: ");
             use std::io::Write;
             std::io::stdout().flush().unwrap();
         }
@@ -23,10 +23,11 @@ async fn main() {
     let mut lines = stdin.lines();
 
     while let Ok(Some(line)) = lines.next_line().await {
-        if let Some(c) = line.chars().next() {
-            let _ = write.send(c.to_string().into()).await;
+        let word = line.trim();
+        if !word.is_empty() {
+            let _ = write.send(word.to_string().into()).await;
         }
-        print!("Your letter: ");
+        print!("Your word: ");
         use std::io::Write;
         std::io::stdout().flush().unwrap();
     }

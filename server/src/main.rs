@@ -1,17 +1,13 @@
-use clap::{Parser, ValueEnum};
 use futures::{SinkExt, StreamExt};
 use std::sync::{Arc, Mutex};
-use tokio::net::TcpListener;
+use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::broadcast;
 use tokio_tungstenite::accept_async;
 
 #[tokio::main]
 async fn main() {
-    let port = get_port();
-    let listener = TcpListener::bind(format!("127.0.0.1::{port}"))
-        .await
-        .unwrap();
-    println!("[Server] Listening on port {port}");
+    let listener = TcpListener::bind("127.0.0.1:9001").await.unwrap();
+    println!("Server running on ws://127.0.0.1:9001");
 
     let sentence = Arc::new(Mutex::new(String::new()));
     let (tx, _rx) = broadcast::channel(100);
@@ -34,11 +30,14 @@ async fn main() {
             loop {
                 tokio::select! {
                     Some(Ok(msg)) = read.next() => {
-                        let msg_text = msg.to_text().unwrap_or("");
-                        if msg_text.len() == 1 {
+                        let msg_text = msg.to_text().unwrap_or("").trim();
+                        if !msg_text.is_empty() {
                             let mut s = sentence.lock().unwrap();
+                            if !s.is_empty() {
+                                s.push(' ');
+                            }
                             s.push_str(msg_text);
-                            println!("Updated sentence: {s}");
+                            println!("Updated sentence: {s}" );
                             let _ = tx.send(s.clone());
                         }
                     }
@@ -50,16 +49,4 @@ async fn main() {
             }
         });
     }
-}
-
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-pub struct Cli {
-    #[arg(long)]
-    pub port: Option<u16>,
-}
-
-fn get_port() -> u16 {
-    let args = Cli::parse();
-    args.port.unwrap_or(9001)
 }
