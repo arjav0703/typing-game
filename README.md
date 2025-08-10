@@ -37,7 +37,7 @@ Server running on ws://127.0.0.1:9001
 In another terminal window (or multiple for multiplayer fun):
 
 ```bash
-cargo run --bin client
+cargo run --bin client <server_ip_address(blank if localhost)>
 ```
 
 <div align="center">
