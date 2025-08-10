@@ -13,6 +13,7 @@ use ratatui::{
     Frame, Terminal,
 };
 use std::{
+    env,
     error::Error,
     io,
     sync::{Arc, Mutex},
@@ -73,6 +74,25 @@ impl Default for App {
 }
 
 impl App {
+    fn new(server_url: String) -> App {
+        App {
+            state: AppState::Welcome,
+            current_input: String::new(),
+            sentence: String::new(),
+            connection_status: "Not connected".to_string(),
+            users_count: 1,
+            typing_speed: 0.0,
+            start_time: None,
+            chars_typed: 0,
+            error_message: None,
+            server_url,
+            should_quit: false,
+            show_help: false,
+        }
+    }
+}
+
+impl App {
     fn connect(&mut self) {
         self.state = AppState::Connecting;
         self.connection_status = "Connecting...".to_string();
@@ -126,6 +146,24 @@ impl App {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    // Parse command line arguments
+    let args: Vec<String> = env::args().collect();
+    let server_ip = if args.len() > 1 {
+        &args[1]
+    } else {
+        "127.0.0.1"
+    };
+
+    // Validate IP format (basic check)
+    if !is_valid_ip_or_hostname(server_ip) {
+        eprintln!("Error: Invalid IP address or hostname: {}", server_ip);
+        eprintln!("Usage: {} [IP_ADDRESS|HOSTNAME]", args[0]);
+        eprintln!("Example: {} 192.168.1.100", args[0]);
+        std::process::exit(1);
+    }
+
+    let server_url = format!("ws://{}:9001", server_ip);
+
     // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -133,7 +171,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let app = Arc::new(Mutex::new(App::default()));
+    let app = Arc::new(Mutex::new(App::new(server_url)));
     let (event_tx, event_rx) = mpsc::unbounded_channel::<AppEvent>();
 
     // Spawn WebSocket client task
@@ -426,6 +464,15 @@ fn draw_welcome_screen(f: &mut Frame, app: &App) {
             ),
         ]),
         Line::from(""),
+        Line::from(vec![
+            Span::styled("Server: ", Style::default().fg(Color::White)),
+            Span::styled(
+                &app.server_url,
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        ]),
         Line::from(""),
         Line::from(vec![
             Span::styled("Press ", Style::default().fg(Color::White)),
@@ -665,6 +712,11 @@ fn draw_help_popup(f: &mut Frame) {
         Line::from("  • Live sentence updates"),
         Line::from("  • Multi-user support"),
         Line::from(""),
+        Line::from("🔗 Connection:"),
+        Line::from("  • Run with: ./client [IP_ADDRESS]"),
+        Line::from("  • Default: 127.0.0.1 (localhost)"),
+        Line::from("  • Example: ./client 192.168.1.100"),
+        Line::from(""),
         Line::from(vec![
             Span::styled("Press ", Style::default().fg(Color::White)),
             Span::styled(
@@ -711,4 +763,28 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
             Constraint::Percentage((100 - percent_x) / 2),
         ])
         .split(popup_layout[1])[1]
+}
+
+fn is_valid_ip_or_hostname(addr: &str) -> bool {
+    // Check if it's a valid IPv4 address
+    if addr.parse::<std::net::Ipv4Addr>().is_ok() {
+        return true;
+    }
+
+    // Check if it's a valid IPv6 address
+    if addr.parse::<std::net::Ipv6Addr>().is_ok() {
+        return true;
+    }
+
+    // Basic hostname validation (allows letters, numbers, dots, and hyphens)
+    if addr.is_empty() || addr.len() > 253 {
+        return false;
+    }
+
+    addr.chars()
+        .all(|c| c.is_alphanumeric() || c == '.' || c == '-')
+        && !addr.starts_with('-')
+        && !addr.ends_with('-')
+        && !addr.starts_with('.')
+        && !addr.ends_with('.')
 }
